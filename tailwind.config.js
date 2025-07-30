@@ -6,9 +6,12 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        cream: '#EFECE5',
+      fontFamily:{
+        kulfam:["Kufam", "sans-serif"]
       },
+      screens: {
+        xs: '450px'
+      }
     },
   },
   plugins: [],

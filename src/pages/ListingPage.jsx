@@ -99,7 +99,6 @@ const ListingPage = () => {
     <>
       {/* Navbar */}
       <div className="navbar bg-[#FDFAF0]">
-        {" "}
         {/* border-b-2 border-[#CCAB4A] */}
         <ListingsNav />
       </div>

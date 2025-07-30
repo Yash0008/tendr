@@ -1,4 +1,4 @@
-// Formatted and responsive version of LandingPageNew
+// Formatted and responsive version of LandingPage
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import HeroSection_LandingPage from "../components/HeroSection_LandingPage";
@@ -57,7 +57,7 @@ const recommended_arr = [
   { src: Photographer, label: "Photographer" },
 ];
 
-const LandingPageNew = () => {
+const LandingPage = () => {
   const navigate = useNavigate();
   const [activeQuestion, setActiveQuestion] = useState(null);
 
@@ -368,4 +368,4 @@ const LandingPageNew = () => {
   );
 };
 
-export default LandingPageNew;
+export default LandingPage;

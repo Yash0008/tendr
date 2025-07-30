@@ -1,7 +1,7 @@
 // src/router.jsx
 import { createBrowserRouter } from 'react-router-dom';
 
-import LandingPageNew from './pages/LandingPageNew';
+import LandingPage from './pages/LandingPage.jsx';
 import AuthPage from './pages/AuthPage';
 import VendorRegistration from './pages/VendorRegistration';
 import EventForm from './pages/EventForm';
@@ -13,9 +13,12 @@ import ChatPage from './pages/ChatPage';
 import VendorFlow from './pages/VendorFlow';
 import CorporateBooking from './pages/CorporateBooking';
 import CorporateSignup from "./pages/CorporateSignUp";
+import AdminDashboard from "./pages/AdminDashboard";
+import UserDashboard from "./pages/UserDashboard";
+import VendorDashboard from "./pages/VendorDashboard";
 
 const router = createBrowserRouter([
-  { path: '/', element: <LandingPageNew />},
+  { path: '/', element: <LandingPage />},
   { path: '/VendorRegistration', element: <VendorRegistration /> },
   { path: '/chat', element: <ChatPage /> },
   { path: '/VendorDetails', element: <VendorDetails /> },
@@ -24,6 +27,9 @@ const router = createBrowserRouter([
   { path: '/login', element: <AuthPage /> },
   { path: '/signup', element: <AuthPage /> },
   { path: '/CorporateBooking', element: <CorporateBooking /> },
+  { path: '/AdminDashboard', element: <AdminDashboard /> },
+  { path: '/UserDashboard', element: <UserDashboard /> },
+  { path: '/VendorDashboard', element: <VendorDashboard /> },
   {
     path: '/vendor',
     children: [
