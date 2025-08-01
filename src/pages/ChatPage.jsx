@@ -66,7 +66,7 @@ const ChatPage = () => {
         setMessages((prevMessages) => [
           ...prevMessages,
           {
-            text: "Hello! We'd love to help you with your event.",
+            text: "Thank you for your message! I'll get back to you shortly with a detailed response.",
             sender: "vendor",
           },
         ]);

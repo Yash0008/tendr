@@ -1,11 +1,10 @@
-// Responsive Hero Section
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../redux/authSlice';
 import logo from "../assets/logo2.png";
 import LandingPage1 from "../assets/LandingPage1.jpg";
-import FilterBar from '../components/FilterBar';
+
 import EastIcon from '@mui/icons-material/East';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -128,24 +127,20 @@ const HeroSection_LandingPage = () => {
           {words[index]}
         </span>
       </div>
+{/* 
 
-      {/* FILTER BAR */}
-      <div className="filterbar_container px-4 pt-5 pb-12">
-        <FilterBar />
-      </div>
-
-      {/* GROUP BOOKING */}
-      <div className="make_a_group flex flex-col items-center gap-4 px-4 pb-10">
-        <p className='text-white text-lg md:text-xl font-semibold text-center'>
-          Require more than one service? <span className='text-[#CCAB4A]'>Click the button below</span>
-        </p>
-        <button
-          onClick={() => navigate("/plan-event/form")}
-          className="bg-white text-[#CCAB4A] hover:bg-[#CCAB4A] hover:text-white rounded-2xl px-6 py-2 flex items-center gap-3 font-bold transition transform hover:scale-105 active:scale-95"
-        >
-          GROUP BOOKING
+             {/* BOOKING */}
+       <div className="make_a_group flex flex-col items-center gap-4 px-4 pb-10">
+         <p className='text-white text-lg md:text-xl font-semibold text-center'>
+           Require more than one service? <span className='text-[#f5b041]'>Click the button below</span>
+         </p>
+         <button
+           onClick={() => navigate("/plan-event/form")}
+           className="bg-white text-[#f7dc6f] hover:bg-[#f5b041] hover:text-white rounded-2xl px-8 py-3 flex items-center gap-4 font-bold transition transform hover:scale-105 active:scale-95 text-lg"
+         >
+           BOOKING
           <span className="w-8 h-8 bg-[#CCAB4A] hover:bg-white text-white hover:text-[#CCAB4A] rounded-xl flex items-center justify-center">
-            <EastIcon fontSize="small" />
+            <EastIcon fontSize="medium" />
           </span>
         </button>
       </div>

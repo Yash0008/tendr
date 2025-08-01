@@ -1,347 +1,347 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout, fetchUserProfile } from '../redux/authSlice';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css'; // Default styles (we'll override)
+import logo from "../assets/logo2.png";
+import EventIcon from '@mui/icons-material/Event';
+import HistoryIcon from '@mui/icons-material/History';
+import BookIcon from '@mui/icons-material/Book';
+import PaymentIcon from '@mui/icons-material/Payment';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
 
-import EastIcon from "@mui/icons-material/East";
-
-import Dashboards_Nav from "../components/Dashboards_Nav";
-
-import { Doughnut_BookingCategory_UserDashboard } from "../components/Charts_Dashboards";
-
-import { LayoutDashboard, IndianRupee, TicketSlash, ChartColumnDecreasing, UserRound, BriefcaseBusiness, Puzzle, ArrowLeft, CalendarCheck2, CalendarClock, CalendarFold, BadgeIndianRupee, CalendarX2, Camera, Music, SprayCan, HandPlatter, Store, Handshake, MonitorCheck, MonitorX, UserPlus } from 'lucide-react';
-
-const formatMoney1 = (amount) => {
-  return `₹${amount.toLocaleString('en-IN')}`;
+// Mock API calls (replace with actual API integration)
+const fetchEvents = async () => {
+  const upcoming = [
+    { id: 1, eventName: "Birthday Party", date: "2025-06-15", venue: "The Grand Hall" },
+    { id: 2, eventName: "Office Party", date: "2025-06-20", venue: "Sky Lounge" },
+  ];
+  const past = [
+    { id: 3, eventName: "Anniversary Celebration", date: "2025-05-10", venue: "Riverside Gardens" },
+  ];
+  return [...upcoming, ...past]; // Combine into a single list
 };
 
-const sidebar_arr = [
-  {
-    label: 'Bookings',
-    icon: <CalendarFold size={22} />,
-    key: 'Bookings',
-  },
-  {
-    label: 'Payments',
-    icon: <BadgeIndianRupee size={22} />,
-    key: 'Payments',
-  },
-  {
-    label: 'Preferences',
-    icon: <Puzzle size={22} />,
-    key: 'Preferences',
-  }
-];
+const fetchBookings = async () => {
+  return [
+    { id: 1, vendorName: "Elite Caterers", service: "Catering", status: "Confirmed", date: "2025-06-15" },
+    { id: 2, vendorName: "DJ Sparks", service: "Entertainment", status: "Pending", date: "2025-06-20" },
+  ];
+};
 
-const stats_bookings = [
-  {
-    label: 'Total Bookings',
-    value: 7,
-    icon: <CalendarFold size={32} />,
-    key: 'customer'
-  },
-  {
-    label: 'Completed bookings',
-    value: 6,
-    icon: <CalendarCheck2 size={32} />,
-    key: 'vendor'
-  },
-  {
-    label: 'Pending bookings',
-    value: 1,
-    icon: <CalendarClock size={32} />,
-    key: 'events-completed'
-  },
-  {
-    label: 'Cancelled bookings',
-    value: 2,
-    icon: <CalendarX2 size={32} />,
-    key: 'events-completed'
-  },
-  {
-    label: 'Average booking value',
-    value: 23800,
-    icon: <IndianRupee size={32} />,
-    key: 'events-due'
-  }
-];
+const fetchPayments = async () => {
+  return [
+    { id: 1, amount: 5000, status: "Completed", date: "2025-06-01", bookingId: 1 },
+    { id: 2, amount: 2000, status: "Pending", date: "2025-06-05", bookingId: 2 },
+  ];
+};
 
-const stats_payments = [
-  {
-    label: 'Total amount spent',
-    value: 238000,
-    icon: <CalendarFold size={32} />,
-    key: 'customer'
-  },
-  {
-    label: 'Average transaction value',
-    value: 34000,
-    icon: <CalendarCheck2 size={32} />,
-    key: 'vendor'
-  },
-  {
-    label: 'Number of payments',
-    value: 132,
-    icon: <CalendarClock size={32} />,
-    key: 'events-completed'
-  }
-];
+const fetchNotifications = async () => {
+  return [
+    { id: 1, message: "Your booking with Elite Caterers has been confirmed!", date: "2025-06-01" },
+    { id: 2, message: "Reminder: Office Party on 2025-06-20", date: "2025-06-05" },
+  ];
+};
 
-const favoriteEventTypes = [
-  { type: "Office Party", count: 18, medal: "🥇" },
-  { type: "Birthday", count: 12, medal: "🥈" },
-  { type: "Festival", count: 8, medal: "🥉" },
-];
-
-const preferredServices = [
-  { service: "Photographer", count: 9, medal: "🥇" },
-  { service: "Catering", count: 8, medal: "🥈" },
-  { service: "Entertainment", count: 7, medal: "🥉" },
-];
+const fetchGroupBookings = async () => {
+  return [
+    { id: 1, eventName: "Birthday Party", services: ["Catering", "Entertainment"], status: "Confirmed", date: "2025-06-15" },
+  ];
+};
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const [activeDropdown, setactiveDropdown] = useState("bookings")
+  const dispatch = useDispatch();
+  const { user, profile, loading, error } = useSelector((state) => state.auth);
+
+  const [events, setEvents] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [groupBookings, setGroupBookings] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  useEffect(() => {
+    dispatch(fetchUserProfile()); // Fetch user profile on component mount
+
+    const loadData = async () => {
+      const allEvents = await fetchEvents();
+      const userBookings = await fetchBookings();
+      const userPayments = await fetchPayments();
+      const userNotifications = await fetchNotifications();
+      const userGroupBookings = await fetchGroupBookings();
+
+      setEvents(allEvents);
+      setBookings(userBookings);
+      setPayments(userPayments);
+      setNotifications(userNotifications);
+      setGroupBookings(userGroupBookings);
+    };
+    loadData();
+  }, [dispatch]);
+
+  const handleLogout = () => {
+    dispatch(logout()).then(() => {
+      navigate('/');
+      setIsModalOpen(false);
+    });
+  };
+
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : '';
+
+  // Custom tile content for calendar to show events
+  const tileContent = ({ date, view }) => {
+    if (view === "month") {
+      const dateString = date.toISOString().split('T')[0];
+      const dayEvents = events.filter((event) => event.date === dateString);
+      return dayEvents.length > 0 ? (
+        <div className="flex flex-col items-center mt-1">
+          {dayEvents.map((event) => (
+            <div
+              key={event.id}
+              className="w-2 h-2 bg-[#CCAB4A] rounded-full"
+              onClick={() => setSelectedEvent(event)}
+            />
+          ))}
+        </div>
+      ) : null;
+    }
+    return null;
+  };
+
+  const tileClassName = ({ date, view }) => {
+    if (view === "month") {
+      const dateString = date.toISOString().split('T')[0];
+      const hasEvents = events.some((event) => event.date === dateString);
+      return hasEvents ? "bg-[#FFD3C3] rounded-full" : "";
+    }
+    return "";
+  };
 
   return (
-
-    <div className="flex flex-col h-screen">
-
-      {/* Navbar */}
-      <div className="navbar bg-white border-b-2 border-[#CCAB4A]">
-        <Dashboards_Nav />
+    <div className="flex h-screen bg-[#F7F4EF]">
+      {/* Sidebar */}
+      <div className="w-64 bg-[#FFD3C3] p-6 flex flex-col justify-between rounded-r-[40px] shadow-lg">
+        <div>
+          <div className="mb-10">
+            <img src={logo} alt="Tendr Logo" className="h-16 cursor-pointer" onClick={() => navigate('/')} />
+          </div>
+          <nav className="flex flex-col gap-4">
+            <div className="flex items-center gap-3 text-[#D48060] font-bold text-lg cursor-pointer hover:bg-[#fbbfa7] p-3 rounded-xl transition-colors duration-300">
+              <EventIcon /> Events Calendar
+            </div>
+            <div className="flex items-center gap-3 text-[#D48060] font-bold text-lg cursor-pointer hover:bg-[#fbbfa7] p-3 rounded-xl transition-colors duration-300">
+              <BookIcon /> Bookings
+            </div>
+            <div className="flex items-center gap-3 text-[#D48060] font-bold text-lg cursor-pointer hover:bg-[#fbbfa7] p-3 rounded-xl transition-colors duration-300">
+              <PaymentIcon /> Payments
+            </div>
+            <div className="flex items-center gap-3 text-[#D48060] font-bold text-lg cursor-pointer hover:bg-[#fbbfa7] p-3 rounded-xl transition-colors duration-300">
+              <NotificationsIcon /> Notifications
+            </div>
+            <div className="flex items-center gap-3 text-[#D48060] font-bold text-lg cursor-pointer hover:bg-[#fbbfa7] p-3 rounded-xl transition-colors duration-300">
+              <GroupIcon /> Group Bookings
+            </div>
+          </nav>
+        </div>
       </div>
 
-      {/* Main content below navbar, takes remaining height */}
-      <div className="mainbody w-full flex flex-1">
-
-        <div className="left w-[30%] xs:w-[25%] bg-[#fff4d4] h-full flex flex-col items-center py-8">
-
-          {/* Sidebar options */}
-          <div className="options flex flex-col items-center w-full">
-            <div className="flex flex-col gap-3 w-[220px] items-center">
-              {sidebar_arr.map((item) => {
-                const key = item.key.toLowerCase();
-                const isActive = activeDropdown === key;
-
-                return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => setactiveDropdown(key)}
-                    className={`group cursor-pointer rounded-[16px] pl-2 sm:pl-4 pr-2 flex items-center justify-between font-bold w-[80px] sm:w-[100px] md:w-[140px] lg:w-[180px] xl:w-[250px] h-[40px] transform transition-transform duration-500 ease-in-out hover:scale-105 hover:-translate-y-1 active:scale-95 ${isActive ? "bg-[#CCAB4A] text-white" : "bg-white text-[#CCAB4A] hover:bg-[#CCAB4A] hover:text-white"}`}
-                  >
-                    <span className="pb-[2px] text-base hidden lg:block">{item.label}</span>
-                    <span className="pb-[2px] text-base block lg:hidden">{item.icon}</span>
-                    <span className={`arrowButton w-[30px] h-[30px] rounded-[13px] flex items-center justify-center transition duration-500 ${isActive ? "bg-white text-[#CCAB4A]" : "bg-[#CCAB4A] text-white group-hover:bg-white group-hover:text-[#CCAB4A]"}`}>
-                      <EastIcon fontSize="medium" />
-                    </span>
-                  </button>
-                );
-              })}
-
-            </div>
-          </div>
-
-          {/* Back Button at bottom */}
-          <div className="back_btn mt-20">
-            <button
-              type="button"
-              onClick={() => navigate("/")}
-              className=" w-[50px] sm:w-[120px] xl:w-[200px] flex justify-center items-center gap-2 sm:pr-4 py-2 text-black bg-white hover:shadow-md transition-all duration-300 rounded-full"
+      {/* Main Content */}
+      <div className="flex-1 p-10 overflow-y-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-extrabold text-[#D48060]">User Dashboard</h1>
+          <div className="relative">
+            <div
+              onClick={() => setIsModalOpen(!isModalOpen)}
+              className="w-10 h-10 bg-[#CCAB4A] text-white rounded-full flex items-center justify-center text-xl font-bold shadow-md cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-base font-semibold hidden sm:block">Go Back</span>
-            </button>
+              {userInitial}
+            </div>
+            {isModalOpen && (
+              <div className="absolute top-12 right-0 w-48 bg-[#F7F4EF] rounded-xl shadow-lg py-2 z-50">
+                <div
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-[#D48060] font-semibold hover:bg-[#FFD3C3] cursor-pointer transition-colors duration-300"
+                >
+                  <PersonIcon fontSize="small" />
+                  <span>Profile</span>
+                </div>
+                <div
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 text-[#D48060] font-semibold hover:bg-[#FFD3C3] cursor-pointer transition-colors duration-300"
+                >
+                  <LogoutIcon fontSize="small" />
+                  <span>Logout</span>
+                </div>
+              </div>
+            )}
           </div>
-
         </div>
 
-        {activeDropdown === "bookings" && (
-          <div className="right-dashboard w-[70%] xs:w-[85%] bg-[#FDFAF0] border-l-2 border-[#CCAB4A] px-10">
-
-            {/* Heading */}
-            <div className="heading font-semibold text-[32px] xs:text-4xl sm:text-5xl my-4">
-              Bookings
+        {/* User Profile */}
+        <div className="bg-[#FFD3C3] p-6 rounded-[30px] mb-6 shadow-md">
+          <h2 className="text-2xl font-bold text-[#D48060] mb-4">Profile</h2>
+          {loading && <p className="text-[#D48060]">Loading profile...</p>}
+          {error && <p className="text-red-500">Error: {error}</p>}
+          {profile && (
+            <div className="text-[#D48060] font-semibold">
+              <p>Name: {profile.name}</p>
+              <p>Email: {profile.email}</p>
+              <p>Phone: {profile.phoneNumber}</p>
             </div>
+          )}
+        </div>
 
-            {/* Info Cards Upper */}
-            <div className="py-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-                {stats_bookings.map((item) => (
-                  <div
-                    key={item.key}
-                    className={`min-h-[160px] w-full px-6 rounded-[20px] bg-white border-2 border-[#CCAB4A] flex flex-col justify-between py-5`}
-                  >
-                    {/* Icon */}
-                    <div className="icon">{item.icon}</div>
-
-                    {/* Bottom Content */}
-                    <div className="content flex flex-col items-center">
-                      <div className="heading font-semibold text-base md:text-lg text-gray-500 leading-none text-center">
-                        {item.label}
-                      </div>
-                      <div className="metric text-[38px] md:text-[55px] lg:text-[65px] font-bold text-[#CCAB4A] leading-none">
-                        {item.label.toLowerCase().includes('value')
-                          ? formatMoney1(item.value)
-                          : item.value.toLocaleString('en-IN')}
-                      </div>
-                    </div>
-                  </div>
-
-                ))}
-
-              </div>
-            </div>
-
+        {/* Events Calendar */}
+        <div className="bg-[#FFD3C3] p-6 rounded-[30px] mb-6 shadow-md">
+          <h2 className="text-2xl font-bold text-[#D48060] mb-4">Events Calendar</h2>
+          <div className="flex justify-center">
+            <Calendar
+              value={new Date("2025-06-08")} // Current date
+              tileContent={tileContent}
+              tileClassName={tileClassName}
+              className="bg-white rounded-xl shadow-sm border-none text-[#D48060] font-semibold w-full max-w-lg"
+              navigationLabel={({ date }) =>
+                `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`
+              }
+            />
           </div>
-        )}
-
-        {activeDropdown === "payments" && (
-
-          <div className="right-dashboard w-[70%] xs:w-[85%] bg-[#FDFAF0] border-l-2 border-[#CCAB4A] px-10">
-
-            {/* Heading */}
-            <div className="heading font-semibold text-[32px] xs:text-4xl sm:text-5xl my-4">
-              Payments
+          {selectedEvent && (
+            <div className="mt-4 p-4 bg-[#F7F4EF] rounded-xl shadow-sm">
+              <h3 className="text-lg font-semibold text-[#D48060]">{selectedEvent.eventName}</h3>
+              <p className="text-[#D48060]">Date: {selectedEvent.date}</p>
+              <p className="text-[#D48060]">Venue: {selectedEvent.venue}</p>
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="mt-2 text-[#D48060] font-semibold hover:underline"
+              >
+                Close
+              </button>
             </div>
+          )}
+        </div>
 
-            {/* Info Cards Upper */}
-            <div className="py-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                {stats_payments.map((item, index) => (
-                  <div
-                    key={item.key}
-                    className="min-h-[160px] w-full px-6 rounded-[20px] bg-white border-2 border-[#CCAB4A] flex flex-col justify-between py-5"
-                  >
-                    <div className="icon">{item.icon}</div>
-
-                    <div className="content flex flex-col items-center">
-                      <div className="heading font-semibold text-base md:text-lg text-gray-500 leading-none text-center">
-                        {item.label}
-                      </div>
-                      <div className="metric text-[38px] md:text-[55px] lg:text-[65px] font-bold text-[#CCAB4A] leading-none text-center">
-                        {item.label === "Number of payments"
-                          ? item.value.toLocaleString('en-IN')
-                          : formatMoney1(item.value)}
-                      </div>
-                    </div>
-                  </div>
-
-                ))}
-
+        {/* Bookings */}
+        <div className="bg-[#FFD3C3] p-6 rounded-[30px] mb-6 shadow-md">
+          <h2 className="text-2xl font-bold text-[#D48060] mb-4">Bookings</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {bookings.map((booking) => (
+              <div key={booking.id} className="bg-[#F7F4EF] p-4 rounded-xl shadow-sm hover:bg-[#fbbfa7] transition-colors duration-300">
+                <p className="text-[#D48060] font-semibold">{booking.vendorName}</p>
+                <p className="text-[#D48060]">{booking.service}</p>
+                <p className="text-[#D48060]">Status: {booking.status}</p>
+                <p className="text-[#D48060]">{booking.date}</p>
+                <button
+                  onClick={() => navigate(`/vendor/${booking.id}`, { state: { vendor: { id: booking.id, name: booking.vendorName } } })}
+                  className="mt-2 text-[#CCAB4A] font-semibold hover:underline"
+                >
+                  View Vendor Profile
+                </button>
               </div>
-            </div>
-
+            ))}
           </div>
+        </div>
 
-        )}
-
-        {activeDropdown === "preferences" && (
-
-          <div className="right-dashboard w-[70%] xs:w-[85%] bg-[#FDFAF0] border-l-2 border-[#CCAB4A] px-10">
-
-            {/* Heading */}
-            <div className="heading font-semibold text-[32px] xs:text-4xl sm:text-5xl my-4">
-              Preferences
-            </div>
-
-            {/* Info Cards */}
-            <div className="py-4">
-
-              <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6 mb-10">
-
-                {/* Two side-by-side custom columns */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-
-                  {/* Favorite Event Types */}
-                  <div className="w-full px-6 py-5 bg-white border-2 border-[#CCAB4A] rounded-[20px] flex flex-col justify-start min-h-[400px]">
-                    <div className="mb-4">
-                      <div className="text-xl md:text-2xl font-semibold text-black">Favorite Event Types</div>
-                      <div className="text-sm text-gray-400 leading-4">Most frequently booked</div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col justify-evenly space-y-4">
-                      {favoriteEventTypes.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex justify-between items-start group cursor-pointer"
-                        >
-                          <div className="flex items-start gap-2">
-                            <div className="text-xl md:text-2xl leading-tight group-hover:text-3xl transition-all duration-500">
-                              {item.medal}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-base md:text-xl leading-none break-words">
-                                {item.type}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="text-[#CCAB4A] font-bold text-xl md:text-2xl leading-none">
-                            {item.count}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Preferred Services */}
-                  <div className="w-full px-6 py-5 bg-white border-2 border-[#CCAB4A] rounded-[20px] flex flex-col justify-start min-h-[400px]">
-                    <div className="mb-4">
-                      <div className="text-xl md:text-2xl font-semibold text-black">Preferred Services</div>
-                      <div className="text-sm text-gray-400 leading-4">Most chosen offerings</div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col justify-evenly space-y-4">
-                      {preferredServices.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex justify-between items-start group cursor-pointer"
-                        >
-                          <div className="flex items-start gap-2">
-                            <div className="text-xl md:text-2xl leading-tight group-hover:text-3xl transition-all duration-500">
-                              {item.medal}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-base md:text-xl leading-none break-words">
-                                {item.service}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="text-[#CCAB4A] font-bold text-xl md:text-2xl leading-none">
-                            {item.count}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-
-                {/* Vendors by City */}
-                <div className="h-[400px] w-full px-6 py-5 rounded-[20px] bg-white border-2 border-[#CCAB4A] flex flex-col justify-start">
-                  <div className="heading font-semibold text-2xl text-black mb-2">
-                    Booking by Category
-                  </div>
-                  <div className="flex-1 flex items-center justify-center text-gray-400">
-                    <Doughnut_BookingCategory_UserDashboard />
-                  </div>
-                </div>
-
+        {/* Payments */}
+        <div className="bg-[#FFD3C3] p-6 rounded-[30px] mb-6 shadow-md">
+          <h2 className="text-2xl font-bold text-[#D48060] mb-4">Payments</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {payments.map((payment) => (
+              <div key={payment.id} className="bg-[#F7F4EF] p-4 rounded-xl shadow-sm hover:bg-[#fbbfa7] transition-colors duration-300">
+                <p className="text-[#D48060] font-semibold">Amount: ₹{payment.amount}</p>
+                <p className="text-[#D48060]">Status: {payment.status}</p>
+                <p className="text-[#D48060]">{payment.date}</p>
+                <p className="text-[#D48060]">Booking ID: {payment.bookingId}</p>
               </div>
-
-            </div>
-
+            ))}
           </div>
+        </div>
 
-        )}
+        {/* Notifications */}
+        <div className="bg-[#FFD3C3] p-6 rounded-[30px] mb-6 shadow-md">
+          <h2 className="text-2xl font-bold text-[#D48060] mb-4">Notifications</h2>
+          <div className="flex flex-col gap-4">
+            {notifications.map((notification) => (
+              <div key={notification.id} className="bg-[#F7F4EF] p-4 rounded-xl shadow-sm hover:bg-[#fbbfa7] transition-colors duration-300">
+                <p className="text-[#D48060] font-semibold">{notification.message}</p>
+                <p className="text-[#D48060]">{notification.date}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
+        {/* Group Bookings */}
+        <div className="bg-[#FFD3C3] p-6 rounded-[30px] mb-6 shadow-md">
+          <h2 className="text-2xl font-bold text-[#D48060] mb-4">Group Bookings</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {groupBookings.map((groupBooking) => (
+              <div key={groupBooking.id} className="bg-[#F7F4EF] p-4 rounded-xl shadow-sm hover:bg-[#fbbfa7] transition-colors duration-300">
+                <p className="text-[#D48060] font-semibold">{groupBooking.eventName}</p>
+                <p className="text-[#D48060]">Services: {groupBooking.services.join(", ")}</p>
+                <p className="text-[#D48060]">Status: {groupBooking.status}</p>
+                <p className="text-[#D48060]">{groupBooking.date}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
+      {/* Custom Calendar Styles */}
+      <style>{`
+        .react-calendar {
+          border: none !important;
+        }
+        .react-calendar__navigation {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 1rem;
+        }
+        .react-calendar__navigation button {
+          color: #D48060 !important;
+          font-weight: bold;
+          font-size: 1.2rem;
+          padding: 0.5rem 1rem;
+          background: none;
+          border: none;
+          cursor: pointer;
+        }
+        .react-calendar__navigation button:hover {
+          background: #fbbfa7 !important;
+          border-radius: 0.75rem;
+        }
+        .react-calendar__tile {
+          color: #D48060 !important;
+          padding: 0.75rem;
+          font-weight: 500;
+        }
+        .react-calendar__tile--now {
+          background: #CCAB4A !important;
+          color: white !important;
+          border-radius: 50%;
+        }
+        .react-calendar__tile--active {
+          background: #D48060 !important;
+          color: white !important;
+          border-radius: 50%;
+        }
+        .react-calendar__tile:hover {
+          background: #fbbfa7 !important;
+          border-radius: 50%;
+        }
+        .react-calendar__month-view__days__day--weekend {
+          color: #D48060 !important;
+        }
+        .react-calendar__month-view__days__day--neighboringMonth {
+          color: #A9746E !important;
+        }
+      `}</style>
     </div>
-
   );
 };
 

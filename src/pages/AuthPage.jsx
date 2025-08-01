@@ -80,34 +80,34 @@ const AuthPage = () => {
     >
       <div className="absolute inset-0 bg-[#CCAB4A] opacity-30 z-0" />
 
-      <div className="flex-grow flex items-center justify-center px-4 pt-4 relative z-10">
+      <div className="flex-grow flex items-center justify-center px-3 sm:px-4 pt-4 relative z-10">
         <div
           className={`bg-[#F7F4EF] ${
-            isSignup ? "py-6 px-6" : "p-8"
+            isSignup ? "py-4 sm:py-6 px-4 sm:px-6" : "p-6 sm:p-8"
           } rounded-2xl shadow-lg w-full max-w-sm`}
         >
-          <div className="flex justify-center mb-4 sm:mb-6">
+          <div className="flex justify-center mb-3 sm:mb-4">
             <img
               src={logo}
               alt="tendr logo"
-              className="w-48 sm:w-48 md:w-[300px] lg:w-[326px] h-auto"
+              className="w-40 sm:w-48 md:w-[300px] lg:w-[326px] h-auto"
             />
           </div>
 
-          <h2 className="text-2xl font-bold text-center mb-4 sm:mb-6 text-gray-800">
+          <h2 className="text-xl sm:text-2xl font-bold text-center mb-3 sm:mb-4 sm:mb-6 text-gray-800">
             {isSignup ? "Welcome to tendr!" : "Sign in to tendr!"}
           </h2>
 
           {error && (
-            <div className="text-red-500 text-sm text-center mb-4">
+            <div className="text-red-500 text-xs sm:text-sm text-center mb-3 sm:mb-4">
               {error}
-            </ div>
+            </div>
           )}
 
           {isSignup ? (
-            <form className="space-y-3" onSubmit={handleSignupSubmit}>
+            <form className="space-y-2 sm:space-y-3" onSubmit={handleSignupSubmit}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Full Name
                 </label>
                 <input
@@ -115,12 +115,12 @@ const AuthPage = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-3 py-1.5 text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   disabled={loading}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
                 <input
@@ -128,12 +128,12 @@ const AuthPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-3 py-1.5 text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   disabled={loading}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Password
                 </label>
                 <input
@@ -141,12 +141,12 @@ const AuthPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-3 py-1.5 text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   disabled={loading}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Phone Number
                 </label>
                 <input
@@ -154,19 +154,19 @@ const AuthPage = () => {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className="w-full px-3 py-1.5 text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   disabled={loading}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Location
                 </label>
                 <select
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full px-3 py-1.5 text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   disabled={loading}
                 >
                   <option value="">Select a location</option>
@@ -178,7 +178,7 @@ const AuthPage = () => {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="text-white text-sm font-semibold rounded-xl w-28 h-9 m-1"
+                  className="text-white text-xs sm:text-sm font-semibold rounded-xl w-24 sm:w-28 h-8 sm:h-9 m-1"
                   style={{ backgroundColor: "#CCAB4A" }}
                   disabled={loading}
                 >
@@ -187,9 +187,9 @@ const AuthPage = () => {
               </div>
             </form>
           ) : (
-            <form className="space-y-4" onSubmit={handleLoginSubmit}>
+            <form className="space-y-3 sm:space-y-4" onSubmit={handleLoginSubmit}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Phone Number
                 </label>
                 <input
@@ -197,12 +197,12 @@ const AuthPage = () => {
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   disabled={loading}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Password
                 </label>
                 <input
@@ -210,17 +210,17 @@ const AuthPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-yellow-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   disabled={loading}
                 />
               </div>
-              <div className="text-right text-sm font-bold text-gray-600 hover:underline cursor-pointer">
+              <div className="text-right text-xs sm:text-sm font-bold text-gray-600 hover:underline cursor-pointer">
                 Forgot Your Password?
               </div>
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="text-white font-semibold rounded-xl w-32 h-10"
+                  className="text-white text-xs sm:text-sm font-semibold rounded-xl w-28 sm:w-32 h-8 sm:h-10"
                   style={{ backgroundColor: "#CCAB4A" }}
                   disabled={loading}
                 >
@@ -230,7 +230,7 @@ const AuthPage = () => {
             </form>
           )}
 
-          <div className="mt-5 flex flex-col sm:flex-row items-center justify-center text-sm text-gray-700 font-bold gap-1 bg-white rounded-xl p-3">
+          <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row items-center justify-center text-xs sm:text-sm text-gray-700 font-bold gap-1 bg-white rounded-xl p-2 sm:p-3">
             <span>{isSignup ? "Already have an account?" : "New to tendr?"}</span>
             <span
               className="font-semibold cursor-pointer hover:underline"
@@ -243,8 +243,8 @@ const AuthPage = () => {
         </div>
       </div>
 
-      <footer className="w-full text-black text-sm py-3 px-4 text-center bg-opacity-60 mt-8">
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-4 font-semibold">
+      <footer className="w-full text-black text-xs sm:text-sm py-2 sm:py-3 px-3 sm:px-4 text-center bg-opacity-60 mt-6 sm:mt-8">
+        <div className="flex flex-wrap justify-center gap-1 sm:gap-2 md:gap-4 font-semibold">
           <span>tendr ©</span>
           <span>|</span>
           <a href="#" className="hover:underline cursor-pointer">
@@ -260,9 +260,7 @@ const AuthPage = () => {
           </a>
           <span>|</span>
           <a href="#" className="hover:underline cursor-pointer">
-           
-
- Get in touch
+  Get in touch
           </a>
         </div>
       </footer>

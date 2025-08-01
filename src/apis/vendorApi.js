@@ -168,3 +168,31 @@ export const getVendors = async (filters = {}) => {
     throw error;
   }
 };
+
+
+export const getVendorById = async (vendorId) => {
+  try {
+    const response = await fetch(`${BASE_URL}/vendors/${vendorId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const contentType = response.headers.get("Content-Type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      throw new Error(`Expected JSON, but got: ${text.substring(0, 100)}...`);
+    }
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to fetch vendor details");
+    }
+
+    return result; // returns vendor details
+  } catch (error) {
+    console.error("Get Vendor By ID Error:", error);
+    throw error;
+  }
+}

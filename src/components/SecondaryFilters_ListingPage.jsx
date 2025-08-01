@@ -1,101 +1,85 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
-const SecondaryFilters_ListingPage = ({ onFiltersChange }) => {
-  const [filters, setFilters] = useState({
-    customizableMenu: false,
-    veganOption: false,
-    organicIngredient: false,
-    kidFriendly: false,
-    locallySourced: false,
-    onSiteChef: false,
-    waitStaff: false,
-    bartenderService: false,
-    uniformedStaff: false,
-    multiLanguageStaff: false,
-    eventCoordinator: false,
-    setupCleanup: false,
-    ratings: [],
-  });
-
-  useEffect(() => {
-    if (typeof onFiltersChange === "function") {
-      onFiltersChange(filters);
-    }
-  }, [filters, onFiltersChange]);
-
-  const filterOptions = [
-    { key: "customizableMenu", label: "Customizable Menu" },
-    { key: "veganOption", label: "Vegan Option" },
-    { key: "organicIngredient", label: "Organic Ingredient" },
-    { key: "kidFriendly", label: "Kid-Friendly" },
-    { key: "locallySourced", label: "Locally Sourced Produce" },
-    { key: "onSiteChef", label: "On-Site Chef" },
-    { key: "waitStaff", label: "Wait Staff Included" },
-    { key: "bartenderService", label: "Bartender Service" },
-    { key: "uniformedStaff", label: "Uniformed Staff" },
-    { key: "multiLanguageStaff", label: "Multi-Language Staff" },
-    { key: "eventCoordinator", label: "Event Coordinator Support" },
-    { key: "setupCleanup", label: "Setup & Cleanup Included" },
-  ];
-
-  const ratingOptions = [5, 4, 3, 2, 1];
-
-  const handleCheckboxChange = (field) => {
-    setFilters((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
-
-  const handleRatingChange = (rating) => {
-    setFilters((prev) => ({
-      ...prev,
-      ratings: prev.ratings.includes(rating)
-        ? prev.ratings.filter((r) => r !== rating)
-        : [...prev.ratings, rating],
-    }));
+const SecondaryFilters_ListingPage = ({ filters, onFilterChange }) => {
+  const handleCheckboxChange = (filterType, value) => {
+    const currentValues = filters[filterType] || [];
+    const newValues = currentValues.includes(value)
+      ? currentValues.filter(v => v !== value)
+      : [...currentValues, value];
+    
+    onFilterChange(filterType, newValues);
   };
 
   return (
-    <div className="filter-section w-full">
-      <div className="secondary_heading ml-12 mb-5 font-bold text-2xl">
-        Filter Options
-      </div>
-      <div className="filter_checkbox ml-16 w-fit">
-        <div className="flex flex-col gap-2 text-lg">
-          {filterOptions.map(({ key, label }) => (
-            <label key={key} className="flex items-center gap-3 cursor-pointer">
+    <div className="secondary-filters space-y-4 sm:space-y-6">
+      {/* Cuisine Types */}
+      <div className="filter-group">
+        <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-3">Cuisine Types</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+          {["North Indian", "South Indian", "Chinese", "Italian", "Mexican", "Continental"].map((cuisine) => (
+            <label key={cuisine} className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
-                checked={filters[key]}
-                onChange={() => handleCheckboxChange(key)}
-                className="hidden peer"
+                checked={(filters.cuisineTypes || []).includes(cuisine)}
+                onChange={() => handleCheckboxChange("cuisineTypes", cuisine)}
+                className="w-4 h-4 sm:w-5 sm:h-5 text-[#CCAB4A] border-gray-300 rounded focus:ring-[#CCAB4A]"
               />
-              <span className="w-5 h-5 rounded-full border-2 border-gray-500 peer-checked:bg-[#CCAB4A] peer-hover:border-[#CCAB4A] transition-all duration-200"></span>
-              {label}
+              <span className="text-sm sm:text-base text-gray-700">{cuisine}</span>
             </label>
           ))}
         </div>
       </div>
 
-      <div className="secondary_heading ml-12 mb-5 mt-9 font-bold text-2xl">
-        Vendor Ratings
-      </div>
-      <div className="rating_checkbox ml-16 mb-5 w-fit">
-        <div className="flex flex-col gap-2 text-lg">
-          {ratingOptions.map((rating) => (
-            <label
-              key={rating}
-              className="flex items-center gap-3 cursor-pointer"
-            >
+      {/* Dietary Preferences */}
+      <div className="filter-group">
+        <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-3">Dietary Preferences</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+          {["Vegetarian", "Vegan", "Non-Vegetarian", "Gluten-Free", "Halal", "Jain"].map((diet) => (
+            <label key={diet} className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
-                checked={filters.ratings.includes(rating)}
-                onChange={() => handleRatingChange(rating)}
-                className="hidden peer"
+                checked={(filters.dietaryPreferences || []).includes(diet)}
+                onChange={() => handleCheckboxChange("dietaryPreferences", diet)}
+                className="w-4 h-4 sm:w-5 sm:h-5 text-[#CCAB4A] border-gray-300 rounded focus:ring-[#CCAB4A]"
               />
-              <span className="w-5 h-5 rounded-full border-2 border-gray-500 peer-checked:bg-[#CCAB4A] peer-hover:border-[#CCAB4A] transition-all duration-200"></span>
-              {rating} Star{rating > 1 && "s"}
+              <span className="text-sm sm:text-base text-gray-700">{diet}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Service Features */}
+      <div className="filter-group">
+        <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-3">Service Features</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+          {["On-Site Cooking", "Delivery", "Setup & Cleanup", "Staff Provided", "Custom Menu", "Tasting Available"].map((feature) => (
+            <label key={feature} className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={(filters.serviceFeatures || []).includes(feature)}
+                onChange={() => handleCheckboxChange("serviceFeatures", feature)}
+                className="w-4 h-4 sm:w-5 sm:h-5 text-[#CCAB4A] border-gray-300 rounded focus:ring-[#CCAB4A]"
+              />
+              <span className="text-sm sm:text-base text-gray-700">{feature}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Rating Filter */}
+      <div className="filter-group">
+        <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-3">Minimum Rating</h4>
+        <div className="flex items-center space-x-2">
+          {[4, 3, 2, 1].map((rating) => (
+            <label key={rating} className="flex items-center space-x-1 cursor-pointer">
+              <input
+                type="radio"
+                name="minRating"
+                checked={filters.minRating === rating}
+                onChange={() => onFilterChange("minRating", rating)}
+                className="w-4 h-4 sm:w-5 sm:h-5 text-[#CCAB4A] border-gray-300 focus:ring-[#CCAB4A]"
+              />
+              <span className="text-sm sm:text-base text-gray-700">{rating}+</span>
             </label>
           ))}
         </div>

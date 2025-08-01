@@ -96,33 +96,19 @@ const ListingPage = () => {
   };
 
   return (
-    <>
-      {/* Navbar */}
-      <div className="navbar bg-[#FDFAF0]">
-        {/* border-b-2 border-[#CCAB4A] */}
-        <ListingsNav />
-      </div>
-
-      {/* Main Body */}
-      <div className="mainbody w-full h-fit flex">
-        <div className="left w-[30%] h-full bg-white">
-          <div className="left_content p-2">
-            {/* Back Button */}
-            <div className="back_btn pl-2">
-              <button
-                type="button"
-                onClick={() => {
-                  navigate("/");
-                }}
-                className="arrowButton w-[45px] h-[45px] bg-[#CCAB4A] hover:bg-[#b89b3f] transition-all duration-200 rounded-full"
-              >
-                <WestIcon className="text-white" fontSize="large" />
-              </button>
-            </div>
-
+    <div className="min-h-screen bg-gray-50">
+      <ListingsNav />
+      
+      <div className="flex flex-col lg:flex-row">
+        {/* Sidebar - Filters */}
+        <div className="w-full lg:w-1/4 bg-white shadow-lg lg:shadow-none lg:border-r border-gray-200">
+          <div className="p-4 lg:p-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 lg:mb-6">Filters</h2>
+            
             {/* Primary Filters */}
-            <div className="primary_filter bg-[#FDFAF0] rounded-[40px] shadow-sm pb-6 pt-6 w-[450px] ml-5 mt-5">
-              <PrimaryFilters_ListingPage
+            <div className="mb-6">
+              <h3 className="text-sm sm:text-base font-semibold text-gray-700 mb-3">Primary Filters</h3>
+              <PrimaryFilters_ListingPage 
                 eventType={eventTypeState}
                 setEventType={setEventTypeState}
                 serviceType={serviceTypeState}
@@ -160,34 +146,113 @@ const ListingPage = () => {
             </div>
 
             {/* Secondary Filters */}
-            <div className="secondary_filter bg-[#FDFAF0] rounded-[40px] shadow-sm pb-6 pt-6 w-[450px] ml-5 mt-7 mb-5">
+            <div className="mb-6">
+              <h3 className="text-sm sm:text-base font-semibold text-gray-700 mb-3">Additional Filters</h3>
               <SecondaryFilters_ListingPage
                 onFiltersChange={setSecondaryFilters}
               />
             </div>
+
+            {/* Apply Filters Button */}
+            <button
+              onClick={() => {
+                setIsLoading(true);
+                setCurrentPage(1);
+                const filters = {
+                  location: locationTypeState,
+                  serviceTypes: [serviceTypeState],
+                  sortBy,
+                  sortOrder,
+                  page: 1,
+                  limit: 10,
+                  serviceFilters: secondaryFilters,
+                };
+
+                getVendors(filters)
+                  .then((data) => {
+                    setVendorList(data.vendors);
+                    setPaginationInfo(data.pagination);
+                  })
+                  .catch((err) =>
+                    console.error("Error fetching vendors:", err)
+                  )
+                  .finally(() => setIsLoading(false));
+              }}
+              className="w-full bg-[#CCAB4A] text-white py-2 sm:py-3 px-4 rounded-lg font-semibold hover:bg-[#ab8f39] transition-colors duration-200 text-sm sm:text-base"
+            >
+              Apply Filters
+            </button>
           </div>
         </div>
 
-        <div className="right w-[70%] bg-white">
-          {/* border-l-2 border-[#CCAB4A]*/}
-
-          <div className="right_content px-7 pt-5 h-full">
-            <VendorList_ListingPage
-              eventType={eventTypeState}
-              serviceType={serviceTypeState}
-              date={dateState}
-              locationType={locationTypeState}
-              guestCount={guestCountState}
-              vendors={vendorList}
-              paginationInfo={paginationInfo}
-              handleShowMore={handleShowMore}
-              isLoading={isLoading}
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              setSortBy={setSortBy}
-              setSortOrder={setSortOrder}
-            />
+        {/* Main Content */}
+        <div className="flex-1 p-4 lg:p-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2">
+              {serviceTypeState || 'All'} Vendors
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600">
+              {vendorList.length} vendors found in {locationTypeState || 'all locations'}
+            </p>
           </div>
+
+          {/* Vendor List */}
+          <VendorList_ListingPage
+            eventType={eventTypeState}
+            serviceType={serviceTypeState}
+            date={dateState}
+            locationType={locationTypeState}
+            guestCount={guestCountState}
+            vendors={vendorList}
+            paginationInfo={paginationInfo}
+            handleShowMore={handleShowMore}
+            isLoading={isLoading}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            setSortBy={setSortBy}
+            setSortOrder={setSortOrder}
+          />
+
+          {/* Pagination */}
+          {paginationInfo && paginationInfo.totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleShowMore()}
+                  disabled={isLoading}
+                  className="px-3 py-2 text-sm sm:text-base bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                
+                {Array.from({ length: Math.min(5, paginationInfo.totalPages) }, (_, i) => {
+                  const pageNum = i + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handleShowMore()}
+                      className={`px-3 py-2 text-sm sm:text-base rounded-lg ${
+                        currentPage === pageNum
+                          ? 'bg-[#CCAB4A] text-white'
+                          : 'bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                
+                <button
+                  onClick={() => handleShowMore()}
+                  disabled={isLoading}
+                  className="px-3 py-2 text-sm sm:text-base bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -225,20 +290,36 @@ const ListingPage = () => {
           </div>
           {/* Right Section */}
           <div className="right mt-4 font-bold text-[24px] flex flex-col gap-2">
-            {[
-              "Support",
-              "Help Center",
-              "Vendor Support",
-              "Vendor",
-              "Get in touch",
-            ].map((text, index) => (
-              <div
-                key={index}
-                className="group cursor-pointer transition-colors duration-300 hover:text-white"
-              >
-                {text}
-              </div>
-            ))}
+            <div
+              onClick={() => navigate("/plan-event/form")}
+              className="group cursor-pointer transition-colors duration-300 hover:text-white"
+            >
+              Support
+            </div>
+            <div
+              onClick={() => navigate("/plan-event/form")}
+              className="group cursor-pointer transition-colors duration-300 hover:text-white"
+            >
+              Help Center
+            </div>
+            <div
+              onClick={() => navigate("/vendor/register")}
+              className="group cursor-pointer transition-colors duration-300 hover:text-white"
+            >
+              Vendor Support
+            </div>
+            <div
+              onClick={() => navigate("/vendor/register")}
+              className="group cursor-pointer transition-colors duration-300 hover:text-white"
+            >
+              Vendor
+            </div>
+            <div
+              onClick={() => navigate("/plan-event/form")}
+              className="group cursor-pointer transition-colors duration-300 hover:text-white"
+            >
+              Get in touch
+            </div>
           </div>
         </div>
         {/* Big tendr text in center */}
@@ -257,7 +338,7 @@ const ListingPage = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

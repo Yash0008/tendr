@@ -198,7 +198,7 @@ const EventPlanningForm = () => {
           {/* [#ea7e53] The One used*/}
 
 
-          {/* Btn Group Booking */}
+          {/* Btn Booking */}
           <div className="text-center">
             <p className="text-lg text-gray-600 mb-4">Require more than one service?</p>
             <div className="btn flex justify-center">
@@ -207,7 +207,7 @@ const EventPlanningForm = () => {
                 onClick={() => navigate("/group-booking")}
                 className="group cursor-pointer bg-white hover:bg-[#ea7e53] hover:text-white rounded-2xl pl-4 pr-2 flex items-center justify-between text-[#ea7e53] font-bold w-[220px] h-[45px] transform transition-transform duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 active:scale-95 shadow-lg"
               >
-                <span className="pb-[2px] text-lg">GROUP BOOKING</span>
+                <span className="pb-[2px] text-lg">BOOKING</span>
                 <span
                   className="group-hover:bg-white arrowButton w-[30px] h-[30px] bg-[#ea7e53] rounded-xl flex items-center justify-center transition duration-300"
                 >

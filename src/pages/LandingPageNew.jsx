@@ -16,7 +16,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import FacebookIcon from "@mui/icons-material/Facebook";
 
-const LandingPage = () => {
+const LandingPageNew = () => {
   const navigate = useNavigate();
   const [activeQuestion, setActiveQuestion] = useState(null);
 
@@ -402,4 +402,4 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage;
+export default LandingPageNew;

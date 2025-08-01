@@ -1,429 +1,409 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../redux/authSlice';
+import logo from "../assets/logo2.png";
+import ChatIcon from '@mui/icons-material/Chat';
+import EventIcon from '@mui/icons-material/Event';
+import BookIcon from '@mui/icons-material/Book';
+import PaymentIcon from '@mui/icons-material/Payment';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import StarIcon from '@mui/icons-material/Star';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
-import EastIcon from "@mui/icons-material/East";
+// Fetch vendor chats from project backend
+const fetchVendorChats = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/vendor/chats", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
 
-import Dashboards_Nav from "../components/Dashboards_Nav";
+    if (!response.ok) {
+      throw new Error("Failed to fetch chats");
+    }
 
-import { Doughnut_EventsBooked_VendorDashboard } from "../components/Charts_Dashboards";
-
-import { Notebook, ChartSpline, Star, IndianRupee, HandCoins, ChartColumnDecreasing, UserRound, BriefcaseBusiness, ArrowLeft, CalendarCheck2, CalendarClock, CalendarFold, CalendarX2, Camera, Music, SprayCan, HandPlatter, Store, Handshake, MonitorCheck, MonitorX, UserPlus } from 'lucide-react';
-
-const formatMoney1 = (amount) => {
-    return `₹${amount.toLocaleString('en-IN')}`;
+    const result = await response.json();
+    return result.data || result || [];
+  } catch (error) {
+    console.error("Error fetching vendor chats:", error);
+    return [];
+  }
 };
 
-const stats_performance = [
-    {
-        label: 'Total Bookings',
-        value: 45,
-        icon: <CalendarFold size={32} />,
-        key: 'total',
-    },
-    {
-        label: 'Pending Bookings',
-        value: 5,
-        icon: <CalendarClock size={32} />,
-        key: 'pending',
-    },
-    {
-        label: 'Completed Bookings',
-        value: 34,
-        icon: <CalendarCheck2 size={32} />,
-        key: 'completion',
-    },
-    {
-        label: 'Cancelled Bookings',
-        value: 6,
-        icon: <CalendarX2 size={32} />,
-        key: 'cancelled',
-    },
-    {
-        label: 'Average Rating',
-        value: 4.5,
-        icon: <Star size={32} />,
-        key: 'rating',
-    },
-];
+const fetchVendorBookings = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/vendor/bookings", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
 
-const stats_revenue = [
-    {
-        label: 'Total Revenue',
-        value: 320000,
-        icon: <IndianRupee size={32} />,
-        key: 'total-revenue',
-    },
-    {
-        label: 'Net Income',
-        value: 210000,
-        icon: <HandCoins size={32} />,
-        key: 'net-income',
+    if (!response.ok) {
+      throw new Error("Failed to fetch bookings");
     }
-];
 
-const sidebar_arr = [
-    {
-        label: 'Performance',
-        icon: <ChartSpline size={22} />,
-        key: 'Performance',
-    },
-    {
-        label: 'Revenue',
-        icon: <IndianRupee size={22} />,
-        key: 'Revenue',
-    },
-    {
-        label: 'Engagement',
-        icon: <Notebook size={22} />,
-        key: 'Engagement',
-    },
-    {
-        label: 'Customer Info',
-        icon: <UserRound size={22} />,
-        key: 'Customer Info',
+    const result = await response.json();
+    return result.data || result || [];
+  } catch (error) {
+    console.error("Error fetching vendor bookings:", error);
+    return [];
+  }
+};
+
+const fetchVendorStats = async () => {
+  try {
+    const response = await fetch("http://localhost:8080/vendor/stats", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch stats");
     }
-];
 
-const stats_engagement = [
-    {
-        label: 'Total Views',
-        value: 1200,
-        icon: <UserRound size={32} />,
-        key: 'views',
-    },
-    {
-        label: 'Conversion Rate',
-        value: '25%',
-        icon: <ChartColumnDecreasing size={32} />,
-        key: 'conversion-rate',
-    }
-];
-
-const guestCountSegments = [
-    { segment: "Small (< 100 guests)", count: 8 },
-    { segment: "Medium (100–300 guests)", count: 10 },
-    { segment: "Large (300+ guests)", count: 6 },
-];
-
-const bookingValueSegments = [
-    { segment: "Low (< ₹30k)", count: 5 },
-    { segment: "Medium (₹30k–80k)", count: 12 },
-    { segment: "High (₹80k+)", count: 7 },
-];
-
-
-
-
+    const result = await response.json();
+    return result.data || result || {
+      totalBookings: 0,
+      totalEarnings: 0,
+      averageRating: 0,
+      totalReviews: 0,
+      thisMonthBookings: 0,
+      thisMonthEarnings: 0
+    };
+  } catch (error) {
+    console.error("Error fetching vendor stats:", error);
+    return {
+      totalBookings: 0,
+      totalEarnings: 0,
+      averageRating: 0,
+      totalReviews: 0,
+      thisMonthBookings: 0,
+      thisMonthEarnings: 0
+    };
+  }
+};
 
 const VendorDashboard = () => {
-    const navigate = useNavigate();
-    const [activeDropdown, setactiveDropdown] = useState("performance")
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
+  const [chats, setChats] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [stats, setStats] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [chatsData, bookingsData, statsData] = await Promise.all([
+          fetchVendorChats(),
+          fetchVendorBookings(),
+          fetchVendorStats()
+        ]);
+        
+        setChats(chatsData);
+        setBookings(bookingsData);
+        setStats(statsData);
+      } catch (error) {
+        console.error('Error loading vendor data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleLogout = () => {
+    dispatch(logout()).then(() => {
+      navigate('/');
+      setIsModalOpen(false);
+    });
+  };
+
+  const handleChatClick = (chat) => {
+    navigate('/vendor/chat', { 
+      state: { 
+        chatId: chat.id,
+        customerName: chat.customerName,
+        customerImage: chat.customerImage,
+        eventType: chat.eventType,
+        eventDate: chat.eventDate,
+        guestCount: chat.guestCount
+      } 
+    });
+  };
+
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'V';
+
+  if (loading) {
     return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-2xl font-semibold text-gray-600">Loading dashboard...</div>
+      </div>
+    );
+  }
 
-        <div className="flex flex-col h-screen">
-
-            {/* Navbar */}
-            <div className="navbar bg-white border-b-2 border-[#CCAB4A]">
-                <Dashboards_Nav />
-            </div>
-
-            {/* Main content below navbar, takes remaining height */}
-            <div className="mainbody w-full flex flex-1">
-
-                <div className="left w-[30%] xs:w-[25%] bg-[#fff4d4] h-full flex flex-col items-center py-8">
-
-                    {/* Sidebar options */}
-                    <div className="options flex flex-col items-center w-full">
-                        <div className="flex flex-col gap-3 w-[220px] items-center">
-                            {sidebar_arr.map((item) => {
-                                const key = item.key.toLowerCase();
-                                const isActive = activeDropdown === key;
-
-                                return (
-                                    <button
-                                        key={item.key}
-                                        type="button"
-                                        onClick={() => setactiveDropdown(key)}
-                                        className={`group cursor-pointer rounded-[16px] pl-2 sm:pl-4 pr-2 flex items-center justify-between font-bold w-[80px] sm:w-[100px] md:w-[140px] lg:w-[180px] xl:w-[250px] h-[40px] transform transition-transform duration-500 ease-in-out hover:scale-105 hover:-translate-y-1 active:scale-95 ${isActive ? "bg-[#CCAB4A] text-white" : "bg-white text-[#CCAB4A] hover:bg-[#CCAB4A] hover:text-white"}`}
-                                    >
-                                        <span className="pb-[2px] text-base hidden lg:block">{item.label}</span>
-                                        <span className="pb-[2px] text-base block lg:hidden">{item.icon}</span>
-                                        <span className={`arrowButton w-[30px] h-[30px] rounded-[13px] flex items-center justify-center transition duration-500 ${isActive ? "bg-white text-[#CCAB4A]" : "bg-[#CCAB4A] text-white group-hover:bg-white group-hover:text-[#CCAB4A]"}`}>
-                                            <EastIcon fontSize="medium" />
-                                        </span>
-                                    </button>
-                                );
-                            })}
-
-                        </div>
-                    </div>
-
-                    {/* Back Button at bottom */}
-                    <div className="back_btn mt-20">
-                        <button
-                            type="button"
-                            onClick={() => navigate("/")}
-                            className=" w-[50px] sm:w-[120px] xl:w-[200px] flex justify-center items-center gap-2 sm:pr-4 py-2 text-black bg-white hover:shadow-md transition-all duration-300 rounded-full"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                            <span className="text-base font-semibold hidden sm:block">Go Back</span>
-                        </button>
-                    </div>
-
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-rose-100">
+      {/* Header */}
+      <div className="bg-white shadow-sm px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <img
+              src={logo}
+              alt="tendr logo"
+              className="h-12 cursor-pointer"
+              onClick={() => navigate("/")}
+            />
+            <span className="text-2xl font-bold text-gray-800">Vendor Dashboard</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate("/")}
+              className="px-4 py-2 text-orange-600 border border-orange-600 rounded-full hover:bg-orange-50 transition-colors"
+            >
+              View Site
+            </button>
+            <div className="relative">
+              <div
+                onClick={() => setIsModalOpen(!isModalOpen)}
+                className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-md cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
+              >
+                {userInitial}
+              </div>
+              {isModalOpen && (
+                <div className="absolute top-12 right-0 w-48 bg-white rounded-xl shadow-lg py-2 z-50">
+                  <div
+                    onClick={() => navigate("/vendor/profile")}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 font-semibold hover:bg-orange-50 cursor-pointer"
+                  >
+                    <PersonIcon fontSize="small" />
+                    <span>Profile</span>
+                  </div>
+                  <div
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 font-semibold hover:bg-orange-50 cursor-pointer"
+                  >
+                    <LogoutIcon fontSize="small" />
+                    <span>Logout</span>
+                  </div>
                 </div>
-
-                {activeDropdown === "performance" && (
-                    <div className="right-dashboard w-[70%] xs:w-[85%] bg-[#FDFAF0] border-l-2 border-[#CCAB4A] px-10">
-
-                        {/* Heading */}
-                        <div className="heading font-semibold text-[32px] xs:text-4xl sm:text-5xl my-4">
-                            Performance
-                        </div>
-
-                        {/* Info Cards Upper */}
-                        <div className="py-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-
-                                {stats_performance.map((item) => (
-                                    <div
-                                        key={item.key}
-                                        className={`h-[180px] w-full px-6 rounded-[20px] bg-white border-2 border-[#CCAB4A] flex flex-col justify-between py-5 ${item.label === 'Average booking value' ? 'col-span-2' : ''
-                                            }`}
-                                    >
-                                        {/* Icon */}
-                                        <div className="icon">{item.icon}</div>
-
-                                        {/* Bottom Content */}
-                                        <div className="content flex flex-col items-center">
-                                            <div className="heading font-semibold text-sm xs:text-lg text-gray-500 leading-none text-center">
-                                                {item.label}
-                                            </div>
-                                            <div className="metric text-[60px] sm:text-[75px] font-bold text-[#CCAB4A] leading-[70px]">
-                                                {item.label.toLowerCase().includes('value')
-                                                    ? formatMoney1(item.value)
-                                                    : item.value.toLocaleString('en-IN')}
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                ))}
-
-                            </div>
-                        </div>
-
-                    </div>
-                )}
-
-                {activeDropdown === "revenue" && (
-
-                    <div className="right-booking w-[70%] xs:w-[85%] bg-[#FDFAF0] border-l-2 border-[#CCAB4A] px-10">
-
-                        {/* Heading */}
-                        <div className="heading font-semibold text-[32px] xs:text-4xl sm:text-5xl my-4">
-                            Revenue
-                        </div>
-
-                        {/* Info Cards Upper */}
-                        <div className="py-4">
-                            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-
-                                {stats_revenue.map((item, index) => (
-                                    <div
-                                        key={item.key}
-                                        className={`h-[180px] w-full px-6 rounded-[20px] bg-white border-2 border-[#CCAB4A] flex flex-col justify-between py-5 ${index < 2 ? 'col-span-2' : ''}`}
-                                    >
-                                        {/* Icon */}
-                                        <div className="icon">{item.icon}</div>
-
-                                        {/* Bottom Content */}
-                                        <div className="content flex flex-col items-center">
-                                            <div className="heading font-semibold text-sm xs:text-lg text-gray-500 leading-none text-center">
-                                                {item.label}
-                                            </div>
-                                            <div className="metric text-xl xs:text-[50px] sm:text-[75px] font-bold text-[#CCAB4A] leading-[70px]">
-                                                {item.label === "Number of payments" ? item.value.toLocaleString('en-IN') : formatMoney1(item.value)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                )}
-
-                {activeDropdown === "engagement" && (
-
-                    <div className="right-booking w-[70%] xs:w-[85%] bg-[#FDFAF0] border-l-2 border-[#CCAB4A] px-10">
-
-                        {/* Heading */}
-                        <div className="heading font-semibold text-[32px] xs:text-4xl sm:text-5xl my-4">
-                            Engagement
-                        </div>
-
-                        {/* Info Cards Upper */}
-                        <div className="py-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
-                                {stats_engagement.map((item, index) => (
-                                    <div
-                                        key={item.key}
-                                        className="h-[180px] w-full px-6 rounded-[20px] bg-white border-2 border-[#CCAB4A] flex flex-col justify-between py-5"
-                                    >
-                                        {/* Icon */}
-                                        <div className="icon">{item.icon}</div>
-
-                                        {/* Bottom Content */}
-                                        <div className="content flex flex-col items-center">
-                                            <div className="heading font-semibold text-sm xs:text-lg text-gray-500 leading-none text-center">
-                                                {item.label}
-                                            </div>
-                                            <div className="metric text-3xl xs:text-[50px] sm:text-[75px] font-bold text-[#CCAB4A] leading-[70px]">
-                                                {item.value.toLocaleString('en-IN')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                )}
-
-                {activeDropdown === "customer info" && (
-
-                    <div className="right-booking w-[70%] xs:w-[85%] bg-[#FDFAF0] border-l-2 border-[#CCAB4A] px-10">
-
-                        {/* Heading */}
-                        <div className="heading font-semibold text-[32px] xs:text-4xl sm:text-5xl my-4">
-                            Customer Info
-                        </div>
-
-                        {/* Info Cards */}
-                        <div className="py-4">
-
-                            <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6 mb-10">
-
-                                {/* Vendors by City */}
-                                <div className="h-[400px] w-full px-6 py-5 rounded-[20px] bg-white border-2 border-[#CCAB4A] flex flex-col justify-start">
-                                    <div className="heading font-semibold text-2xl text-black mb-2">
-                                        Booking by Events
-                                    </div>
-                                    <div className="flex-1 flex items-center justify-center text-gray-400">
-                                        <Doughnut_EventsBooked_VendorDashboard />
-                                    </div>
-                                </div>
-
-                                {/* Two side-by-side custom columns */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-auto">
-
-                                    {/* Guest Count Segments */}
-                                    <div className="flex-1 px-4 sm:px-6 py-4 sm:py-5 bg-white border-2 border-[#CCAB4A] rounded-[16px] sm:rounded-[20px] flex flex-col justify-start h-auto sm:h-[400px]">
-
-                                        {/* Heading */}
-                                        <div className="mb-4">
-                                            <div className="text-2xl font-semibold text-black">Guest Count</div>
-                                            <div className="text-base text-gray-400 leading-4">Based on event size</div>
-                                        </div>
-
-                                        {/* Segment List */}
-                                        <div className="flex-1 flex flex-col justify-evenly space-y-4">
-                                            {guestCountSegments.map((item, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex justify-between items-start group cursor-pointer"
-                                                >
-                                                    {/* Left: label */}
-                                                    <div className="flex items-start gap-2 w-[210px]">
-                                                        <div className="text-xl font-semibold text-black leading-none">
-                                                            {item.segment}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Right: Count */}
-                                                    <div className="text-[#CCAB4A] font-bold text-2xl leading-none">
-                                                        {item.count}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                    </div>
-
-                                    {/* Booking Value Segments */}
-                                    <div className="flex-1 px-4 sm:px-6 py-4 sm:py-5 bg-white border-2 border-[#CCAB4A] rounded-[16px] sm:rounded-[20px] flex flex-col justify-start h-auto sm:h-[400px]">
-
-                                        {/* Heading */}
-                                        <div className="mb-4">
-                                            <div className="text-2xl font-semibold text-black">Booking Value</div>
-                                            <div className="text-base text-gray-400 leading-4">Based on value tiers</div>
-                                        </div>
-
-                                        {/* Segment List */}
-                                        <div className="flex-1 flex flex-col justify-evenly space-y-4">
-                                            {bookingValueSegments.map((item, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex justify-between items-start group cursor-pointer"
-                                                >
-                                                    {/* Left: label */}
-                                                    <div className="flex items-start gap-2 w-[210px]">
-                                                        <div className="text-xl font-semibold text-black leading-none">
-                                                            {item.segment}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Right: Count */}
-                                                    <div className="text-[#CCAB4A] font-bold text-2xl leading-none">
-                                                        {item.count}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                )}
-
+              )}
             </div>
+          </div>
+        </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Total Bookings</p>
+                <p className="text-3xl font-bold text-gray-800">{stats.totalBookings}</p>
+              </div>
+              <BookIcon className="text-orange-500 text-3xl" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Total Earnings</p>
+                <p className="text-3xl font-bold text-gray-800">₹{stats.totalEarnings?.toLocaleString()}</p>
+              </div>
+              <PaymentIcon className="text-green-500 text-3xl" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Average Rating</p>
+                <div className="flex items-center">
+                  <p className="text-3xl font-bold text-gray-800">{stats.averageRating}</p>
+                  <StarIcon className="text-yellow-400 text-2xl ml-1" />
+                </div>
+              </div>
+              <TrendingUpIcon className="text-blue-500 text-3xl" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">This Month</p>
+                <p className="text-3xl font-bold text-gray-800">{stats.thisMonthBookings} bookings</p>
+              </div>
+              <EventIcon className="text-purple-500 text-3xl" />
+            </div>
+          </div>
         </div>
 
-    )
-}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Recent Chats */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Recent Chats</h2>
+              <button
+                onClick={() => navigate("/vendor/chats")}
+                className="text-orange-600 hover:text-orange-700 font-semibold"
+              >
+                View All
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {chats.slice(0, 3).map((chat) => (
+                <div
+                  key={chat.id}
+                  onClick={() => handleChatClick(chat)}
+                  className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="relative">
+                    <img
+                      src={chat.customerImage}
+                      alt={chat.customerName}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    {chat.unreadCount > 0 && (
+                      <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {chat.unreadCount}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-800 truncate">{chat.customerName}</h3>
+                      <span className="text-xs text-gray-500">{chat.timestamp}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
+                        {chat.eventType}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {chat.guestCount} guests
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className={`w-3 h-3 rounded-full ${
+                    chat.status === 'active' ? 'bg-green-500' : 
+                    chat.status === 'pending' ? 'bg-yellow-500' : 'bg-gray-400'
+                  }`}></div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-export default VendorDashboard
+          {/* Recent Bookings */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Recent Bookings</h2>
+              <button
+                onClick={() => navigate("/vendor/bookings")}
+                className="text-orange-600 hover:text-orange-700 font-semibold"
+              >
+                View All
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {bookings.slice(0, 3).map((booking) => (
+                <div key={booking.id} className="p-4 border border-gray-200 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-gray-800">{booking.customerName}</h3>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
+                      booking.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {booking.status}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                    <span>{booking.eventType}</span>
+                    <span>•</span>
+                    <span>{booking.eventDate}</span>
+                    <span>•</span>
+                    <span>{booking.guestCount} guests</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-800">₹{booking.amount?.toLocaleString()}</span>
+                    <span className={`text-xs ${
+                      booking.paymentStatus === 'Paid' ? 'text-green-600' : 'text-yellow-600'
+                    }`}>
+                      {booking.paymentStatus}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
+        {/* Quick Actions */}
+        <div className="mt-8 bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              onClick={() => navigate("/vendor/chats")}
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-xl hover:bg-orange-50 transition-colors"
+            >
+              <ChatIcon className="text-orange-500 text-2xl" />
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-800">View All Chats</h3>
+                <p className="text-sm text-gray-600">Manage customer conversations</p>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => navigate("/vendor/bookings")}
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-xl hover:bg-orange-50 transition-colors"
+            >
+              <BookIcon className="text-orange-500 text-2xl" />
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-800">View Bookings</h3>
+                <p className="text-sm text-gray-600">Check all your bookings</p>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => navigate("/vendor/profile")}
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-xl hover:bg-orange-50 transition-colors"
+            >
+              <PersonIcon className="text-orange-500 text-2xl" />
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-800">Edit Profile</h3>
+                <p className="text-sm text-gray-600">Update your information</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-// w-[70%] xs:w-[85%]
-// w-[30%] xs:w-[25%]
-// w-[80px] sm:w-[100px] md:w-[140px] lg:w-[180px] xl:w-[250px]
-// block lg:hidden
-// hidden lg:block
-// pl-2 sm:pl-4
-
-// heading font-semibold text-[32px] xs:text-4xl sm:text-5xl my-4
-
-
-
-
-// heading font-semibold text-sm xs:text-lg text-gray-500 leading-none text-center
-// grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6
-
-// metric text-[60px] sm:text-[75px] font-bold text-[#CCAB4A] leading-[70px]
-// metric text-xl xs:text-[50px] sm:text-[75px] font-bold text-[#CCAB4A] leading-[70px]
+export default VendorDashboard; 
